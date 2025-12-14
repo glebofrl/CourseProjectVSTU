@@ -16,22 +16,28 @@ typedef struct monitor {
 	char hdmi_port[50];
 }Monitor;
 
+
+Monitor* searchMonitorDiagonal(Monitor monitors[], int size, float search_element, int* result_count);
+Monitor* searchMonitorPanelType(Monitor monitors[], int size, char search_element[], int* result_count);
+
+Monitor* addData(Monitor monitors[], int* size);
+
+unsigned short int getCurved();
+unsigned int getResolution();
+float getDiagonal();
+
 int fillMonitorArray(Monitor monitors[], int size);
 int printMonitorArray(Monitor monitors[], int size, int category_of_measurement);
 int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size, int category_of_measurement);
-Monitor* searchMonitorDiagonal(Monitor monitors[], int size, float search_element, int* result_count);
 int changeMeasurement(Monitor monitors[], int size, int category_of_measurement);
-Monitor* searchMonitorPanelType(Monitor monitors[], int size, char search_element[], int* result_count);
-int input_file(char* filename, Monitor* monitors);
-int output_file(char* filename, Monitor* monitors, int size, int category_of_measurement);
 int compareManufacturer(const void* a, const void* b);
 int changeData(Monitor monitors[], int size);
-unsigned short int getCurved();
-Monitor* addData(Monitor monitors[], int* size);
-float getDiagonal();
-unsigned int getResolution();
+int editID(Monitor* monitors, int size);
 
+int input_file(char* filename, Monitor* monitors);
+int output_file(char* filename, Monitor* monitors, int size, int category_of_measurement);
 
+Monitor* testInput_file(char* filename, Monitor* monitors, int* size);
 
 int main(void) {
 	setlocale(LC_CTYPE, "RUS");
@@ -129,6 +135,7 @@ int main(void) {
 		case '4':
 			printf("Отсортированный массив: ");
 			qsort(monitors, size, sizeof(Monitor), compareManufacturer);
+			editID(monitors, size);
 			printMonitorArray(monitors, size, category_of_measurement);
 			break;
 		case '5':
@@ -138,8 +145,14 @@ int main(void) {
 			break;
 		case '6':
 			printf("Имя файла: ");
-			scanf("%s", fname);
-			input_file(fname, monitors);
+			//scanf("%s", fname);
+			puts("testInputFile:");
+			if (monitors != NULL)
+				free(monitors);
+			monitors = testInput_file("test.txt", monitors, &size);
+			//input_file(fname, monitors);
+			printMonitorArray(monitors, size, category_of_measurement);
+
 			exit_program = 1;
 			break;
 		case '7':
@@ -159,7 +172,7 @@ int main(void) {
 			puts("Ошибка выбора! Повторите попытку");
 			break;
 		}
-
+		
 	}
 
 
@@ -182,6 +195,91 @@ int main(void) {
 
 	system("pause");
 	return 0;
+}
+
+Monitor* testInput_file(char* filename, Monitor* monitors, int* size) {
+	char buffer[256];
+	int count = -1;
+	Monitor* temp;
+	FILE* file = fopen(filename, "r");
+	if (file == NULL) {
+		printf("Ошибка открытия файла\n");
+		return NULL;
+	}
+
+	//for (int i = 0; i < 2; i++) {
+	//	if (fgets(buffer, sizeof(buffer), file) == NULL) {
+	//		puts("Недостаточно данных");
+	//		fclose(file);
+	//		return NULL;
+	//	}
+	//}
+
+	while (fgets(buffer, sizeof(buffer), file)) {
+		if (buffer[0] != ' '/* || buffer[0] == '\n' || buffer[0] == '\0'*/)
+			continue;
+		count++;
+	}
+
+
+	rewind(file);
+
+	for (int i = 0; i < 2; i++) {
+		if (fgets(buffer, sizeof(buffer), file) == NULL) {
+			puts("Недостаточно данных");
+			fclose(file);
+			return NULL;
+		}
+	}
+
+
+	temp = (Monitor*)malloc(count * sizeof(Monitor));
+	for (int i = 0; i < count; i++) {
+		if (fgets(buffer, sizeof(buffer), file) == NULL) continue;
+
+		int j = 0;
+
+		if (buffer[0] != ' '/* || buffer[0] == '\n' || buffer[0] == '\0'*/)
+			continue;
+
+		for (int k = 0; k < sizeof(buffer); k++) {
+			if (buffer[k] != ' ' && buffer[k] != '\n') {
+				buffer[j] = buffer[k];
+				j++;
+			}
+
+
+		}
+
+		buffer[j - 1] = '\0';
+
+
+
+		sscanf(buffer, "%*d||%29[^|]||%f||%ux%u||%19[^|]||%hu||%20[^|]",
+			temp[i].manufacturer,
+			&temp[i].diagonal,
+			&temp[i].horizontal_resolution, &temp[i].vertical_resolution,
+			temp[i].panel_type,
+			&temp[i].curved,
+			temp[i].hdmi_port);
+		temp[i].id = i;
+	}
+
+	//printMonitorArray(monitors, count, 1);
+	printf("%d\n", count);
+
+	//while (!feof(file)) {
+	//	fscanf(file, "")
+	//}
+	//for (int i = 0; i < count; i++)
+	//{
+	//	fscanf(file, "   %d  ||           %s ||         %f ||  3840x2160 ||        OLED ||           1 ||          2x HDMI 2.1 ")
+	//}
+	*size = count;
+	fclose(file);
+
+	return temp;
+
 }
 
 Monitor* addData(Monitor monitors[], int* size) {
@@ -232,6 +330,12 @@ Monitor* addData(Monitor monitors[], int* size) {
 	return newCountOfElements;
 }
 
+int editID(Monitor* monitors, int size) {
+	for (int i = 0; i < size; i++)
+		monitors[i].id = i;
+	return 0;
+}
+
 int changeData(Monitor monitors[], int size) {
 	int id;
 	int choice;
@@ -247,7 +351,7 @@ int changeData(Monitor monitors[], int size) {
 			}
 		} while (id < 0 || id >= size);
 
-		printf("Заполнение карточки лемента [%d] \n", id);
+		printf("Заполнение карточки элемента [%d] \n", id);
 		printf("Производитель: ");
 		scanf("%s", monitors[id].manufacturer);
 
@@ -437,12 +541,12 @@ int testMonitorArray(Monitor monitors[], int size) {
 
 int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size, int category_of_measurement) {
 	if (category_of_measurement)
-		fputs("  id  ||  производитель ||   Диагональ (см)  || Разрешение ||   Матрица   || Изогнутость || HDMI-порт \n", stream);
+		fputs("  id  ||  производитель ||   Диагональ (см)  || Разрешение ||   Матрица   || Изогнутость || HDMI-порт |\n", stream);
 	else
-		fputs("  id  ||  производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость || HDMI-порт \n", stream);
+		fputs("  id  ||  производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость || HDMI-порт |\n", stream);
 	fputs("---------------------------------------------------------------------------------------------------------\n", stream);
 	for (int i = 0; i < size; i++) {
-		fprintf(stream, " %3d  || %14s || %17f || %5ux%4u || %11s || %11hu || %20s \n",
+		fprintf(stream, " %3d  || %14s || %17f || %5ux%4u || %11s || %11hu || %20s |\n",
 			monitors[i].id,
 			monitors[i].manufacturer,
 			monitors[i].diagonal,
@@ -456,9 +560,9 @@ int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size, int cate
 
 int printMonitorArray(Monitor monitors[], int size, int category_of_measurement) {
 	char buffer[256];
-	char label_inch[] = "  id  ||  производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость || HDMI-порт ";
-	char label_cm[] = "  id  ||  производитель ||   Диагональ (см)  || Разрешение ||   Матрица   || Изогнутость || HDMI-порт ";
-	char info[] = " %3d  || %14s || %17f || %5ux%4u || %11s || %11hu || %20s ";
+	char label_inch[] = "  id  ||  производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость || HDMI-порт |";
+	char label_cm[] = "  id  ||  производитель ||   Диагональ (см)  || Разрешение ||   Матрица   || Изогнутость || HDMI-порт |";
+	char info[] = " %3d  || %14s || %17f || %5ux%4u || %11s || %11hu || %20s |";
 	
 	if (category_of_measurement)
 		puts(label_cm);
