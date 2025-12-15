@@ -19,23 +19,27 @@ typedef struct monitor {
 
 Monitor* searchMonitorDiagonal(Monitor monitors[], int size, float search_element, int* result_count);
 Monitor* searchMonitorPanelType(Monitor monitors[], int size, char search_element[], int* result_count);
+Monitor* searchMonitorDiagonalAndPanelType(Monitor monitors[], int size, float search_diagonal, char search_panel_type[], int* result_count);
 
 Monitor* addData(Monitor monitors[], int* size);
 
-unsigned short int getCurved();
+unsigned short int isBinaryInput();
 unsigned int getResolution();
+
 float getDiagonal();
 
 int fillMonitorArray(Monitor monitors[], int size);
 int printMonitorArray(Monitor monitors[], int size, int category_of_measurement);
 int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size, int category_of_measurement);
-int changeMeasurement(Monitor monitors[], int size, int category_of_measurement);
+int changeMeasurement(Monitor monitors[], int size, int* category_of_measurement);
 int compareManufacturer(const void* a, const void* b);
+int compareResolution(const void* a, const void* b);
+int compareManufacturerAndResolution(const void* a, const void* b);
 int changeData(Monitor monitors[], int size);
 int editID(Monitor* monitors, int size);
 
 int input_file(char* filename, Monitor* monitors);
-int output_file(char* filename, Monitor* monitors, int size, int category_of_measurement);
+int output_file(char* filename, Monitor* monitors, int size, int* category_of_measurement);
 
 Monitor* testInput_file(char* filename, Monitor* monitors, int* size);
 
@@ -47,25 +51,23 @@ int main(void) {
 
 	char a;
 	char fname[30];
-	char search_panel_type[20];
 
 	int category_of_measurement = 0;
+	int clear;
 	int size;
-	int exit_program = 0;
+	int menu_active = 1;
 	int search_count = 0;
 
 	float search_diagonal;
 
 
-	do {
+	while (menu_active) {
 		printf("Выберите действие: \n"
 			"0. Заполнить массив константными значениями \n"
 			"1. Заполнить массив с пользователем \n");
 
-		//while (getchar() != '\n');
-		//a = getchar();
-		//while (getchar() != '\n');
 		scanf(" %c", &a);
+		while ((clear = getchar()) != '\n');
 
 		switch (a)
 		{
@@ -74,7 +76,7 @@ int main(void) {
 			monitors = (Monitor*)malloc(size * sizeof(Monitor));
 			testMonitorArray(monitors, size);
 			printMonitorArray(monitors, size, category_of_measurement);
-			exit_program = 1;
+			menu_active = 0;
 			break;
 		case '1':
 			printf("Введите количество записей: ");
@@ -82,116 +84,210 @@ int main(void) {
 			monitors = (Monitor*)malloc(size * sizeof(Monitor));
 			fillMonitorArray(monitors, size);
 			printMonitorArray(monitors, size, category_of_measurement);
-			exit_program = 1;
-			break;
-		default:
-			puts("Ошибка выбора! Повторите попытку");
-			break;
-		}
-	} while (!exit_program);
-	exit_program = 0;
-
-	int menu_active = 1;
-	while (menu_active) {
-		printf("Выберите действие: \n"
-			"1. Изменить единицу измерения \n"
-			"2. Поиск по диагонали \n"
-			"3. Поиск по матрице \n"
-			"4. Сортировка по производителю \n"
-			"5. Выгрузить в файл \n"
-			"6. Загрузить из файла \n"
-			"7. Добавить элементы \n"
-			"8. Изменить данные \n"
-			"q. Выйти из цикла \n");
-
-		//while (getchar() != '\n');
-		//a = getchar();
-		scanf(" %c", &a);
-
-		switch (a)
-		{
-		case '1':
-			if (category_of_measurement == 0)
-				category_of_measurement = 1;
-			else
-				category_of_measurement = 0;
-			changeMeasurement(monitors, size, category_of_measurement);
-			printMonitorArray(monitors, size, category_of_measurement);
-			break;
-		case '2':
-			printf("Искомый элемент: ");
-			scanf("%f", &search_diagonal);
-			searcher = searchMonitorDiagonal(monitors, size, search_diagonal, &search_count);
-			printf("Найдено элементов: %d \n", search_count);
-			printMonitorArray(searcher, search_count, category_of_measurement);
-			break;
-		case '3':
-			printf("Искомый элемент: ");
-			scanf("%s", search_panel_type);
-			searcher = searchMonitorPanelType(monitors, size, search_panel_type, &search_count);
-			printf("Найдено элементов: %d \n", search_count);
-			printMonitorArray(searcher, search_count, category_of_measurement);
-			break;
-		case '4':
-			printf("Отсортированный массив: ");
-			qsort(monitors, size, sizeof(Monitor), compareManufacturer);
-			editID(monitors, size);
-			printMonitorArray(monitors, size, category_of_measurement);
-			break;
-		case '5':
-			printf("Имя файла: ");
-			scanf("%s", fname);
-			output_file(fname, monitors, size, category_of_measurement);
-			break;
-		case '6':
-			printf("Имя файла: ");
-			//scanf("%s", fname);
-			puts("testInputFile:");
-			if (monitors != NULL)
-				free(monitors);
-			monitors = testInput_file("test.txt", monitors, &size);
-			//input_file(fname, monitors);
-			printMonitorArray(monitors, size, category_of_measurement);
-
-			exit_program = 1;
-			break;
-		case '7':
-			monitors = addData(monitors, &size);
-			printMonitorArray(monitors, size, category_of_measurement);
-			exit_program = 1;
-			break;
-		case '8':
-			changeData(monitors, size);
-			printMonitorArray(monitors, size, category_of_measurement);
-			exit_program = 1;
-			break;
-		case 'q':
 			menu_active = 0;
 			break;
 		default:
 			puts("Ошибка выбора! Повторите попытку");
 			break;
 		}
-		
 	}
 
+	menu_active = 1;
+	while (menu_active) {
+		int submenu_active;
+		printf("=== Главное меню === \n"
+			"1. Поиск и сортировка \n"
+			"2. Работа с данными \n"
+			"3. Работа с файлами \n"
+			"q. Завершить работу \n");
+
+		//while (getchar() != '\n');
+		//a = getchar();
+		scanf(" %c", &a);
+		while ((clear = getchar()) != '\n');
 
 
-	//search_count = 0;
-	//searcher = searchMonitorPanelType(monitors, size, "Dell", &search_count);
-	//printf("Найдено элементов: %d \n", search_count);
-	//printMonitorArray(searcher, search_count, category_of_measurement);
+		switch (a)
+		{
+		case '1':
+			submenu_active = 1;
+			break;
+		case '2':
+			submenu_active = 2;
+			break;
+		case '3':
+			submenu_active = 3;
+			break;
+		case 'q':
+			return 0;
+		default:
+			puts("Ошибка выбора! Повторите попытку");
+			continue;
+		}
 
 
 
+		if (submenu_active == 1) {
+			char search_panel_type[20];
+			float search_diagonal;
+			while (submenu_active) {
+				printf("Выберите действие: \n"
+					"1. Поиск по диагонали \n"
+					"2. Поиск по матрице \n"
+					"3. Поиск по диагонали и матрице \n"
+					"4. Сортировка по производителю \n"
+					"5. Сортировка по разрешению \n"
+					"6. Сортировка по производетелю и разрешению \n"
+					"b. Главное меню \n");
 
-	//puts("\n________________________________________СОРТИРОВКА___________________________________");
-	//qsort(monitors, size, sizeof(Monitor), compareManufacturer);
-	//printMonitorArray(monitors, size, category_of_measurement);
+				scanf(" %c", &a);
+				while ((clear = getchar()) != '\n');
 
+				switch (a)
+				{
+				case '1':
+					printf("Выберите единицу измерения (0 - дюймы, 1 - сантиметры): ");
+					unsigned short int check_category = isBinaryInput();
+					if(category_of_measurement == check_category)
+						printMonitorArray(monitors, size, category_of_measurement);
+					else {
+						changeMeasurement(monitors, size, &category_of_measurement);
+						printMonitorArray(monitors, size, category_of_measurement);
+					}
 
+					printf("Искомый элемент: ");
+					scanf("%f", &search_diagonal);
+					searcher = searchMonitorDiagonal(monitors, size, search_diagonal, &search_count);
+					printf("Найдено элементов: %d \n", search_count);
+					printMonitorArray(searcher, search_count, category_of_measurement);
+					break;
+				case '2':
+					printf("Искомый элемент: ");
+					scanf("%s", search_panel_type);
+					searcher = searchMonitorPanelType(monitors, size, search_panel_type, &search_count);
+					printf("Найдено элементов: %d \n", search_count);
+					printMonitorArray(searcher, search_count, category_of_measurement);
+					break;
+				case '3':
+					printf("Искомая диагональ: ");
+					scanf("%f", &search_diagonal);
+					printf("Искомая матрица: ");
+					scanf("%s", search_panel_type);
+					searcher = searchMonitorDiagonalAndPanelType(monitors, size, search_diagonal, search_panel_type, &search_count);
+					printf("Найдено элементов: %d \n", search_count);
+					printMonitorArray(searcher, search_count, category_of_measurement);
+					break;
+				case '4':
+					printf("Отсортированный массив: \n");
+					qsort(monitors, size, sizeof(Monitor), compareManufacturer);
+					editID(monitors, size);
+					printMonitorArray(monitors, size, category_of_measurement);
+					break;
+				case '5':
+					printf("Отсортированный массив: \n");
+					qsort(monitors, size, sizeof(Monitor), compareResolution);
+					editID(monitors, size);
+					printMonitorArray(monitors, size, category_of_measurement);
+					break;
+				case '6':
+					printf("Отсортированный массив: \n");
+					qsort(monitors, size, sizeof(Monitor), compareManufacturerAndResolution);
+					editID(monitors, size);
+					printMonitorArray(monitors, size, category_of_measurement);
+					break;
+				case 'b':
+					submenu_active = 0;
+					break;
+				default:
+					puts("Ошибка выбора! Повторите попытку");
+					break;
+				}
+			}
+		}
+		else if (submenu_active == 2) {
+			while (submenu_active) {
+				printf("Выберите действие: \n"
+					"1. Изменить единицу измерения \n"
+					"2. Добавить элементы \n"
+					"3. Изменить данные \n"
+					"b. Главное меню \n");
 
+				scanf(" %c", &a);
+				while ((clear = getchar()) != '\n');
 
+				switch (a)
+				{
+				case '1':
+					//if (category_of_measurement == 0)
+					//	category_of_measurement = 1;
+					//else
+					//	category_of_measurement = 0;
+					changeMeasurement(monitors, size, &category_of_measurement);
+					printMonitorArray(monitors, size, category_of_measurement);
+					break;
+				case '2':
+					monitors = addData(monitors, &size);
+					printMonitorArray(monitors, size, category_of_measurement);
+					break;
+				case '3':
+					changeData(monitors, size);
+					printMonitorArray(monitors, size, category_of_measurement);
+					break;
+				case 'b':
+					submenu_active = 0;
+					break;
+				default:
+					puts("Ошибка выбора! Повторите попытку");
+					break;
+				}
+			}
+		}
+		else if (submenu_active == 3) {
+			while (submenu_active) {
+				printf("Выберите действие: \n"
+					"1. Выгрузить в файл \n"
+					"2. Загрузить из файла \n"
+					"3. Посмотреть содержимое файла \n"
+					"b. Главное меню \n");
+
+				scanf(" %c", &a);
+				while ((clear = getchar()) != '\n');
+
+				switch (a)
+				{
+				case '1':
+					printf("Имя файла: ");
+					scanf("%s", fname);
+					output_file(fname, monitors, size, &category_of_measurement);
+					break;
+				case '2':
+					printf("Имя файла: ");
+					scanf("%s", fname);
+					//puts("testInputFile:");
+					if (monitors != NULL)
+						free(monitors);
+					monitors = testInput_file(fname, monitors, &size);
+					//input_file(fname, monitors);
+					printMonitorArray(monitors, size, category_of_measurement);
+					break;
+				case '3':
+					printf("Имя файла: ");
+					scanf("%s", fname);
+					//puts("testInputFile:");
+					input_file(fname, monitors);
+					break;
+				case 'b':
+					submenu_active = 0;
+					break;
+				default:
+					puts("Ошибка выбора! Повторите попытку");
+					break;
+				}
+			}
+		}
+
+		
+	}
 
 	system("pause");
 	return 0;
@@ -319,7 +415,8 @@ Monitor* addData(Monitor monitors[], int* size) {
 		printf("Матрица: ");
 		scanf("%s", newCountOfElements[i].panel_type);
 
-		newCountOfElements[i].curved = getCurved();
+		printf("Изогнутость (1 - есть, 0 - нет): ");
+		newCountOfElements[i].curved = isBinaryInput();
 
 		printf("HDMI-порт: ");
 		scanf("%s", newCountOfElements[i].hdmi_port);
@@ -366,7 +463,8 @@ int changeData(Monitor monitors[], int size) {
 		printf("Матрица: ");
 		scanf("%s", monitors[id].panel_type);
 
-		monitors[id].curved = getCurved();
+		printf("Изогнутость (1 - есть, 0 - нет): ");
+		monitors[id].curved = isBinaryInput();
 
 		printf("HDMI-порт: ");
 		scanf("%s", monitors[id].hdmi_port);
@@ -382,7 +480,7 @@ int changeData(Monitor monitors[], int size) {
 unsigned int getResolution() {
 	int value;
 	while (1) {
-		if ((scanf("%d", &value)) == 1 && value > -1) {
+		if ((scanf("%d", &value)) == 1 && value > -1 && value < 10000) {
 			while (getchar() != '\n');
 			return value;
 		}
@@ -408,9 +506,8 @@ float getDiagonal() {
 	}
 }
 
-unsigned short int getCurved() {
+unsigned short int isBinaryInput() {
 	unsigned short int value;
-	printf("Изогнутость (1 - есть, 0 - нет): ");
 	while (1) {
 		scanf("%hu", &value);
 		if (value == 0 || value == 1) {
@@ -438,7 +535,11 @@ int input_file(char* filename, Monitor* monitors) {
 	fclose(file);
 }
 
-int output_file(char* filename, Monitor* monitors, int size, int category_of_measurement) {
+int output_file(char* filename, Monitor* monitors, int size, int* category_of_measurement) {
+	if (*category_of_measurement == 1) {
+		*category_of_measurement = 0;
+		changeMeasurement(monitors, size, &category_of_measurement);
+	}
 	FILE* file = fopen(filename, "w");
 	if (file == NULL) {
 		printf("Ошибка открытия файла");
@@ -452,9 +553,13 @@ int output_file(char* filename, Monitor* monitors, int size, int category_of_mea
 	return 0;
 }
 
-int changeMeasurement(Monitor monitors[], int size,  int category_of_measurement) {
+int changeMeasurement(Monitor monitors[], int size,  int* category_of_measurement) {
+	if (*category_of_measurement == 0)
+		*category_of_measurement = 1;
+	else
+		*category_of_measurement = 0;
 	for (int i = 0; i < size; i++) {
-		if (category_of_measurement)
+		if (*category_of_measurement)
 			monitors[i].diagonal *= INCH;
 		else
 			monitors[i].diagonal /= INCH;
@@ -482,7 +587,8 @@ int fillMonitorArray(Monitor monitors[], int size) {
 		printf("Матрица: ");
 		scanf("%s", monitors[i].panel_type);
 
-		monitors[i].curved = getCurved();
+		printf("Изогнутость (1 - есть, 0 - нет): ");
+		monitors[i].curved = isBinaryInput();
 
 		printf("HDMI-порт: ");
 		scanf("%s", monitors[i].hdmi_port);
@@ -541,12 +647,12 @@ int testMonitorArray(Monitor monitors[], int size) {
 
 int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size, int category_of_measurement) {
 	if (category_of_measurement)
-		fputs("  id  ||  производитель ||   Диагональ (см)  || Разрешение ||   Матрица   || Изогнутость || HDMI-порт |\n", stream);
-	else
-		fputs("  id  ||  производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость || HDMI-порт |\n", stream);
-	fputs("---------------------------------------------------------------------------------------------------------\n", stream);
+		fputs("  id  ||  Производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость ||         HDMI-порт         |\n", stream);
+	//else
+	//	fputs("  id  ||  производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость || HDMI-порт |\n", stream);
+	fputs("-----------------------------------------------------------------------------------------------------------------------\n", stream);
 	for (int i = 0; i < size; i++) {
-		fprintf(stream, " %3d  || %14s || %17f || %5ux%4u || %11s || %11hu || %20s |\n",
+		fprintf(stream, " %3d  || %14s || %17f || %5ux%4u || %11s || %11hu || %25s |\n",
 			monitors[i].id,
 			monitors[i].manufacturer,
 			monitors[i].diagonal,
@@ -560,15 +666,15 @@ int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size, int cate
 
 int printMonitorArray(Monitor monitors[], int size, int category_of_measurement) {
 	char buffer[256];
-	char label_inch[] = "  id  ||  производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость || HDMI-порт |";
-	char label_cm[] = "  id  ||  производитель ||   Диагональ (см)  || Разрешение ||   Матрица   || Изогнутость || HDMI-порт |";
-	char info[] = " %3d  || %14s || %17f || %5ux%4u || %11s || %11hu || %20s |";
+	char label_inch[] = "  id  ||  Производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость ||         HDMI-порт         |";
+	char label_cm[] = "  id  ||  Производитель ||   Диагональ (см)  || Разрешение ||   Матрица   || Изогнутость ||         HDMI-порт         |";
+	char info[] = " %3d  || %14s || %17f || %5ux%4u || %11s || %11hu || %25s |";
 	
 	if (category_of_measurement)
 		puts(label_cm);
 	else
 		puts(label_inch);
-	puts("---------------------------------------------------------------------------------------------------------");
+	puts("-----------------------------------------------------------------------------------------------------------------------");
 	for (int i = 0; i < size; i++) {
 		sprintf(buffer, info,
 			monitors[i].id,
@@ -582,6 +688,34 @@ int printMonitorArray(Monitor monitors[], int size, int category_of_measurement)
 	}
 
 	return 0;
+}
+
+Monitor* searchMonitorDiagonalAndPanelType(Monitor monitors[], int size, float search_diagonal, char search_panel_type[], int* result_count) {
+	int count = 0;
+	Monitor* search_result_array;
+	for (int i = 0; i < size; i++)
+	{
+		if (monitors[i].diagonal == search_diagonal && strcmp(monitors[i].panel_type, search_panel_type) == 0)
+			count++;
+	}
+	search_result_array = (Monitor*)malloc(count * sizeof(Monitor));
+	*result_count = count;
+	int j = 0;
+	for (int i = 0; i < size; i++)
+	{
+		if (monitors[i].diagonal == search_diagonal && strcmp(monitors[i].panel_type, search_panel_type) == 0) {
+			search_result_array[j].id = monitors[i].id;
+			strcpy(search_result_array[j].manufacturer, monitors[i].manufacturer);
+			search_result_array[j].diagonal = monitors[i].diagonal;
+			search_result_array[j].horizontal_resolution = monitors[i].horizontal_resolution;
+			search_result_array[j].vertical_resolution = monitors[i].vertical_resolution;
+			strcpy(search_result_array[j].panel_type, monitors[i].panel_type);
+			search_result_array[j].curved = monitors[i].curved;
+			strcpy(search_result_array[j].hdmi_port, monitors[i].hdmi_port);
+			j++;
+		}
+	}
+	return search_result_array;
 }
 
 Monitor* searchMonitorDiagonal(Monitor monitors[], int size, float search_element, int* result_count) {
@@ -646,8 +780,41 @@ int compareManufacturer(const void* a, const void* b) {
 	const Monitor* MonitorB = (const Monitor*)b;
 
 	return strcmp(MonitorA->manufacturer, MonitorB->manufacturer);
+}
 
-	//return 0;
+int compareResolution(const void* a, const void* b) {
 
+	const Monitor* MonitorA = (const Monitor*)a;
+	const Monitor* MonitorB = (const Monitor*)b;
+
+	int resolutionA = MonitorA->horizontal_resolution * MonitorA->vertical_resolution;
+	int resolutionB = MonitorB->horizontal_resolution * MonitorB->vertical_resolution;
+
+	if (resolutionA < resolutionB)
+		return -1;
+	else if (resolutionA > resolutionB)
+		return 1;
+
+	return 0;
+}
+
+int compareManufacturerAndResolution(const void* a, const void* b) {
+
+	const Monitor* monitorA = (const Monitor*)a;
+	const Monitor* monitorB = (const Monitor*)b;
+
+	int manufacturer_cmp = strcmp(monitorA->manufacturer, monitorB->manufacturer);
+	if (manufacturer_cmp != 0)
+		return manufacturer_cmp;
+
+	int resolutionA = monitorA->horizontal_resolution * monitorA->vertical_resolution;
+	int resolutionB = monitorB->horizontal_resolution * monitorB->vertical_resolution;
+
+	if (resolutionA < resolutionB)
+		return -1;
+	else if (resolutionA > resolutionB)
+		return 1;
+
+	return 0;
 }
 
