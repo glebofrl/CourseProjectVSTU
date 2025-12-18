@@ -43,7 +43,7 @@ int editID(Monitor* monitors, int size);
 int input_file(char* filename, Monitor* monitors);
 int output_file(char* filename, Monitor* monitors, int size, int* category_of_measurement);
 
-Monitor* testInput_file(char* filename, Monitor* monitors, int* size);
+Monitor* get_Input_File(char* filename, Monitor* monitors, int* size);
 
 int main(void) {
 	setlocale(LC_CTYPE, "RUS");
@@ -65,7 +65,7 @@ int main(void) {
 
 	while (menu_active) {
 		printf("Выберите действие: \n"
-			"0. Заполнить массив константными значениями \n"
+			"0. Заполнить массив тестовыми значениями \n"
 			"1. Заполнить массив с пользователем \n");
 
 		scanf(" %c", &a);
@@ -268,7 +268,7 @@ int main(void) {
 					//puts("testInputFile:");
 					if (monitors != NULL)
 						free(monitors);
-					monitors = testInput_file(fname, monitors, &size);
+					monitors = get_Input_File(fname, monitors, &size);
 					//input_file(fname, monitors);
 					printMonitorArray(monitors, size, category_of_measurement);
 					break;
@@ -295,7 +295,7 @@ int main(void) {
 	return 0;
 }
 
-Monitor* testInput_file(char* filename, Monitor* monitors, int* size) {
+Monitor* get_Input_File(char* filename, Monitor* monitors, int* size) {
 	char buffer[256];
 	int count = -1;
 	Monitor* temp;
@@ -364,7 +364,7 @@ Monitor* testInput_file(char* filename, Monitor* monitors, int* size) {
 	}
 
 	//printMonitorArray(monitors, count, 1);
-	printf("%d\n", count);
+	printf("=== Количество элементов в массиве: %d ===\n", count);
 
 	//while (!feof(file)) {
 	//	fscanf(file, "")
@@ -576,6 +576,8 @@ int output_file(char* filename, Monitor* monitors, int size, int* category_of_me
 
 	fclose(file);
 
+	puts("=== Данные успешно выгружены ===");
+
 	return 0;
 }
 
@@ -631,7 +633,7 @@ int testMonitorArray(Monitor monitors[], int size) {
 	monitors[0].vertical_resolution = 1440;
 	strcpy(monitors[0].panel_type, "IPS");
 	monitors[0].curved = 0;
-	strcpy(monitors[0].hdmi_port, "1x HDMI 2.0");
+	strcpy(monitors[0].hdmi_port, "1x_HDMI_2.0");
 
 	monitors[1].id = 1;
 	strcpy(monitors[1].manufacturer, "Samsung");
@@ -640,7 +642,7 @@ int testMonitorArray(Monitor monitors[], int size) {
 	monitors[1].vertical_resolution = 1440;
 	strcpy(monitors[1].panel_type, "VA");
 	monitors[1].curved = 1;
-	strcpy(monitors[1].hdmi_port, "2x HDMI 2.1");
+	strcpy(monitors[1].hdmi_port, "2x_HDMI_2.1");
 
 	monitors[2].id = 2;
 	strcpy(monitors[2].manufacturer, "LG");
@@ -649,7 +651,7 @@ int testMonitorArray(Monitor monitors[], int size) {
 	monitors[2].vertical_resolution = 1080;
 	strcpy(monitors[2].panel_type, "IPS");
 	monitors[2].curved = 0;
-	strcpy(monitors[2].hdmi_port, "2x HDMI 1.4");
+	strcpy(monitors[2].hdmi_port, "2x_HDMI_1.4");
 
 	monitors[3].id = 3;
 	strcpy(monitors[3].manufacturer, "ASUS");
@@ -658,7 +660,7 @@ int testMonitorArray(Monitor monitors[], int size) {
 	monitors[3].vertical_resolution = 2160;
 	strcpy(monitors[3].panel_type, "OLED");
 	monitors[3].curved = 1;
-	strcpy(monitors[3].hdmi_port, "2x HDMI 2.1");
+	strcpy(monitors[3].hdmi_port, "2x_HDMI_2.1");
 
 	monitors[4].id = 4;
 	strcpy(monitors[4].manufacturer, "Dell");
@@ -667,7 +669,7 @@ int testMonitorArray(Monitor monitors[], int size) {
 	monitors[4].vertical_resolution = 1080;
 	strcpy(monitors[4].panel_type, "TN");
 	monitors[4].curved = 0;
-	strcpy(monitors[4].hdmi_port, "1x VGA");
+	strcpy(monitors[4].hdmi_port, "1x_VGA");
 
 	return 0;
 }
