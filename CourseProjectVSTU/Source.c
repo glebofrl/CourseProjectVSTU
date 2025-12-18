@@ -675,13 +675,13 @@ int testMonitorArray(Monitor monitors[], int size) {
 }
 
 int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size, int category_of_measurement) {
-	if (category_of_measurement)
+	/*if (category_of_measurement)*/
 		fputs("  id  ||  Производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость ||         HDMI-порт         |\n", stream);
 	//else
 	//	fputs("  id  ||  производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость || HDMI-порт |\n", stream);
 	fputs("-----------------------------------------------------------------------------------------------------------------------\n", stream);
 	for (int i = 0; i < size; i++) {
-		fprintf(stream, " %3d  || %14s || %17f || %5ux%4u || %11s || %11hu || %25s |\n",
+		fprintf(stream, " %3d  || %14s || %17.2f || %5ux%4u || %11s || %11hu || %25s |\n",
 			monitors[i].id,
 			monitors[i].manufacturer,
 			monitors[i].diagonal,
@@ -697,7 +697,7 @@ int printMonitorArray(Monitor monitors[], int size, int category_of_measurement)
 	char buffer[256];
 	char label_inch[] = "  id  ||  Производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость ||         HDMI-порт         |";
 	char label_cm[] = "  id  ||  Производитель ||   Диагональ (см)  || Разрешение ||   Матрица   || Изогнутость ||         HDMI-порт         |";
-	char info[] = " %3d  || %14s || %17f || %5ux%4u || %11s || %11hu || %25s |";
+	char info[] = " %3d  || %14s || %17.2f || %5ux%4u || %11s || %11hu || %25s |";
 	
 	if (category_of_measurement)
 		puts(label_cm);
