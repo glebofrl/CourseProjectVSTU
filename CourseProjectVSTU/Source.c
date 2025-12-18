@@ -7,7 +7,7 @@
 
 typedef struct monitor {
 	int id;
-	char manufacturer[30];
+	char manufacturer[31];
 	float diagonal;
 	unsigned int horizontal_resolution;
 	unsigned int vertical_resolution;
@@ -22,6 +22,8 @@ Monitor* searchMonitorPanelType(Monitor monitors[], int size, char search_elemen
 Monitor* searchMonitorDiagonalAndPanelType(Monitor monitors[], int size, float search_diagonal, char search_panel_type[], int* result_count);
 
 Monitor* addData(Monitor monitors[], int* size);
+
+int getManufacturer(Monitor* monitors, int index);
 
 unsigned short int isBinaryInput();
 unsigned int getResolution();
@@ -400,9 +402,8 @@ Monitor* addData(Monitor monitors[], int* size) {
 			//if(monitors[i].id == NULL)
 		newCountOfElements[i].id = i;
 
-		printf("Заполнение карточки лемента [%d] \n", i);
-		printf("Производитель: ");
-		scanf("%s", newCountOfElements[i].manufacturer);
+		printf("Заполнение карточки элемента [%d] \n", i);
+		getManufacturer(newCountOfElements, i);
 
 		printf("Диагональ: ");
 		newCountOfElements[i].diagonal = getDiagonal();
@@ -449,8 +450,7 @@ int changeData(Monitor monitors[], int size) {
 		} while (id < 0 || id >= size);
 
 		printf("Заполнение карточки элемента [%d] \n", id);
-		printf("Производитель: ");
-		scanf("%s", monitors[id].manufacturer);
+		getManufacturer(monitors, id);
 
 		printf("Диагональ: ");
 		monitors[id].diagonal = getDiagonal();
@@ -488,6 +488,32 @@ unsigned int getResolution() {
 			while (getchar() != '\n');
 			printf("Ошибка! Некорректное значение. Введите заново: ");
 		}
+	}
+}
+
+int getManufacturer(Monitor* monitors, int index) {
+	char manufacturer[31];
+
+	printf("Производитель (максимум 30 символов): ");
+	while (1) {
+		int count = 0;
+		int symbols = 0;
+
+		scanf("%30s", manufacturer);
+		while (getchar() != '\n');
+
+		for (int i = 0; manufacturer[i] != '\0'; i++) {
+			symbols++;
+			if (manufacturer[i] != '1' && manufacturer[i] != '2' && manufacturer[i] != '3' && manufacturer[i] != '4' && manufacturer[i] != '5' && manufacturer[i] != '6' && manufacturer[i] != '7' && manufacturer[i] != '8' && manufacturer[i] != '9' && manufacturer[i] != '0')
+				count++;
+		}
+
+		if (count == symbols) {
+			strcpy(monitors[index].manufacturer, manufacturer);
+			return 0;
+		}
+
+		printf("Производитель не должен содержать в названии число! Повторите попытку: ");
 	}
 }
 
@@ -572,9 +598,10 @@ int fillMonitorArray(Monitor monitors[], int size) {
 		//if(monitors[i].id == NULL)
 			monitors[i].id = i;
 
-		printf("Заполнение карточки лемента [%d] \n", i);
-		printf("Производитель: ");
-		scanf("%s", monitors[i].manufacturer);
+		printf("Заполнение карточки элемента [%d] \n", i);
+		//printf("Производитель: ");
+		//scanf("%s", monitors[i].manufacturer);
+		getManufacturer(monitors, i);
 
 		printf("Диагональ: ");
 		monitors[i].diagonal = getDiagonal();
@@ -779,7 +806,12 @@ int compareManufacturer(const void* a, const void* b) {
 	const Monitor* MonitorA = (const Monitor*)a;
 	const Monitor* MonitorB = (const Monitor*)b;
 
-	return strcmp(MonitorA->manufacturer, MonitorB->manufacturer);
+
+	return _stricmp(MonitorA->manufacturer, MonitorB->manufacturer);
+
+
+
+	//return strcmp(MonitorA->manufacturer, MonitorB->manufacturer);
 }
 
 int compareResolution(const void* a, const void* b) {
@@ -803,7 +835,7 @@ int compareManufacturerAndResolution(const void* a, const void* b) {
 	const Monitor* monitorA = (const Monitor*)a;
 	const Monitor* monitorB = (const Monitor*)b;
 
-	int manufacturer_cmp = strcmp(monitorA->manufacturer, monitorB->manufacturer);
+	int manufacturer_cmp = _stricmp(monitorA->manufacturer, monitorB->manufacturer);
 	if (manufacturer_cmp != 0)
 		return manufacturer_cmp;
 
