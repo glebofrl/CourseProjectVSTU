@@ -66,7 +66,8 @@ int main(void) {
 	while (menu_active) {
 		printf("Выберите действие: \n"
 			"0. Заполнить массив тестовыми значениями \n"
-			"1. Заполнить массив с пользователем \n");
+			"1. Заполнить массив с пользователем \n"
+			"2. Загрузка данных из файла \n");
 
 		scanf(" %c", &a);
 		while ((clear = getchar()) != '\n');
@@ -87,6 +88,17 @@ int main(void) {
 			fillMonitorArray(monitors, size);
 			printMonitorArray(monitors, size, category_of_measurement);
 			menu_active = 0;
+			break;
+		case '2':
+			printf("Имя файла: ");
+			scanf("%s", fname);
+			if (monitors != NULL)
+				free(monitors);
+			monitors = get_Input_File(fname, monitors, &size);
+			if (monitors != NULL) {
+				printMonitorArray(monitors, size, category_of_measurement);
+				menu_active = 0;
+			}
 			break;
 		default:
 			puts("Ошибка выбора! Повторите попытку");
@@ -220,10 +232,6 @@ int main(void) {
 				switch (a)
 				{
 				case '1':
-					//if (category_of_measurement == 0)
-					//	category_of_measurement = 1;
-					//else
-					//	category_of_measurement = 0;
 					changeMeasurement(monitors, size, &category_of_measurement);
 					printMonitorArray(monitors, size, category_of_measurement);
 					break;
@@ -255,31 +263,24 @@ int main(void) {
 				scanf(" %c", &a);
 				while ((clear = getchar()) != '\n');
 
+				if (a == 'b') break;
+
+				printf("Имя файла: ");
+				scanf("%s", fname);
 				switch (a)
 				{
 				case '1':
-					printf("Имя файла: ");
-					scanf("%s", fname);
 					output_file(fname, monitors, size, &category_of_measurement);
 					break;
 				case '2':
-					printf("Имя файла: ");
-					scanf("%s", fname);
-					//puts("testInputFile:");
 					if (monitors != NULL)
 						free(monitors);
 					monitors = get_Input_File(fname, monitors, &size);
-					//input_file(fname, monitors);
-					printMonitorArray(monitors, size, category_of_measurement);
+					if (monitors != NULL)
+						printMonitorArray(monitors, size, category_of_measurement);
 					break;
 				case '3':
-					printf("Имя файла: ");
-					scanf("%s", fname);
-					//puts("testInputFile:");
 					input_file(fname, monitors);
-					break;
-				case 'b':
-					submenu_active = 0;
 					break;
 				default:
 					puts("Ошибка выбора! Повторите попытку");
@@ -551,7 +552,7 @@ int input_file(char* filename, Monitor* monitors) {
 	char buffer[256];
 	FILE* file = fopen(filename, "r");
 	if (file == NULL) {
-		printf("Ошибка открытия файла");
+		puts("Ошибка открытия файла");
 		return 1;
 	}
 	while (fgets(buffer, sizeof(buffer), file)) {
@@ -568,7 +569,7 @@ int output_file(char* filename, Monitor* monitors, int size, int* category_of_me
 	}
 	FILE* file = fopen(filename, "w");
 	if (file == NULL) {
-		printf("Ошибка открытия файла");
+		puts("Ошибка открытия файла");
 		return 1;
 	}
 
