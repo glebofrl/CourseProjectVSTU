@@ -32,7 +32,7 @@ float getDiagonal();
 
 int fillMonitorArray(Monitor monitors[], int size);
 int printMonitorArray(Monitor monitors[], int size, int category_of_measurement);
-int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size, int category_of_measurement);
+int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size);
 int changeMeasurement(Monitor monitors[], int size, int* category_of_measurement);
 int compareManufacturer(const void* a, const void* b);
 int compareResolution(const void* a, const void* b);
@@ -572,7 +572,7 @@ int output_file(char* filename, Monitor* monitors, int size, int* category_of_me
 		return 1;
 	}
 
-	printInFileMonitorArray(file, monitors, size, category_of_measurement);
+	printInFileMonitorArray(file, monitors, size);
 
 	fclose(file);
 
@@ -674,11 +674,8 @@ int testMonitorArray(Monitor monitors[], int size) {
 	return 0;
 }
 
-int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size, int category_of_measurement) {
-	/*if (category_of_measurement)*/
-		fputs("  id  ||  Производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость ||         HDMI-порт         |\n", stream);
-	//else
-	//	fputs("  id  ||  производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость || HDMI-порт |\n", stream);
+int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size) {
+	fputs("  id  ||  Производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость ||         HDMI-порт         |\n", stream);
 	fputs("-----------------------------------------------------------------------------------------------------------------------\n", stream);
 	for (int i = 0; i < size; i++) {
 		fprintf(stream, " %3d  || %14s || %17.2f || %5ux%4u || %11s || %11hu || %25s |\n",
