@@ -536,8 +536,7 @@ float getDiagonal() {
 unsigned short int isBinaryInput() {
 	unsigned short int value;
 	while (1) {
-		scanf("%hu", &value);
-		if (value == 0 || value == 1) {
+		if ((scanf("%hu", &value)) == 1 && (value == 0 || value == 1)) {
 			while (getchar() != '\n');
 			return value;
 		}
