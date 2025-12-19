@@ -521,8 +521,8 @@ int getManufacturer(Monitor* monitors, int index) {
 float getDiagonal() {
 	float value;
 	while (1) {
-		scanf("%f", &value);
-		if (value > -1) {
+		;
+		if ((scanf("%f", &value) == 1) && value > -1) {
 			while (getchar() != '\n');
 			return value;
 		}
