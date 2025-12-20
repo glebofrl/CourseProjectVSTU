@@ -115,11 +115,8 @@ int main(void) {
 			"3. Работа с файлами \n"
 			"q. Завершить работу \n");
 
-		//while (getchar() != '\n');
-		//a = getchar();
 		scanf(" %c", &a);
 		while ((clear = getchar()) != '\n');
-
 
 		switch (a)
 		{
@@ -306,13 +303,6 @@ Monitor* get_Input_File(char* filename, Monitor* monitors, int* size) {
 		return NULL;
 	}
 
-	//for (int i = 0; i < 2; i++) {
-	//	if (fgets(buffer, sizeof(buffer), file) == NULL) {
-	//		puts("Недостаточно данных");
-	//		fclose(file);
-	//		return NULL;
-	//	}
-	//}
 
 	while (fgets(buffer, sizeof(buffer), file)) {
 		if (buffer[0] != ' '/* || buffer[0] == '\n' || buffer[0] == '\0'*/)
@@ -364,16 +354,8 @@ Monitor* get_Input_File(char* filename, Monitor* monitors, int* size) {
 		temp[i].id = i;
 	}
 
-	//printMonitorArray(monitors, count, 1);
 	printf("=== Количество элементов в массиве: %d ===\n", count);
 
-	//while (!feof(file)) {
-	//	fscanf(file, "")
-	//}
-	//for (int i = 0; i < count; i++)
-	//{
-	//	fscanf(file, "   %d  ||           %s ||         %f ||  3840x2160 ||        OLED ||           1 ||          2x HDMI 2.1 ")
-	//}
 	*size = count;
 	fclose(file);
 
@@ -400,7 +382,6 @@ Monitor* addData(Monitor monitors[], int* size) {
 		newCountOfElements[i] = monitors[i];
 
 	for (int i = *size; i < number_of_elements; i++) {
-			//if(monitors[i].id == NULL)
 		newCountOfElements[i].id = i;
 
 		printf("Заполнение карточки элемента [%d] \n", i);
@@ -597,12 +578,10 @@ int changeMeasurement(Monitor monitors[], int size,  int* category_of_measuremen
 
 int fillMonitorArray(Monitor monitors[], int size) {
 	for (int i = 0; i < size; i++) {
-		//if(monitors[i].id == NULL)
 			monitors[i].id = i;
 
 		printf("Заполнение карточки элемента [%d] \n", i);
-		//printf("Производитель: ");
-		//scanf("%s", monitors[i].manufacturer);
+
 		getManufacturer(monitors, i);
 
 		printf("Диагональ: ");
@@ -807,10 +786,6 @@ int compareManufacturer(const void* a, const void* b) {
 
 
 	return _stricmp(MonitorA->manufacturer, MonitorB->manufacturer);
-
-
-
-	//return strcmp(MonitorA->manufacturer, MonitorB->manufacturer);
 }
 
 int compareResolution(const void* a, const void* b) {
