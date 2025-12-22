@@ -67,7 +67,7 @@ int main(void) {
 
 	while (menu_active) {
 		printf("Выберите действие: \n"
-			"0. Заполнить массив тестовыми значениями \n"
+			//"0. Заполнить массив тестовыми значениями \n"
 			"1. Ручной ввод данных \n"
 			"2. Загрузка данных из файла \n");
 
@@ -138,156 +138,149 @@ int main(void) {
 			continue;
 		}
 
-
-
-		if (submenu_active == 1) {
+		while (submenu_active == 1) {
 			char search_panel_type[20];
 			float search_diagonal;
-			while (submenu_active) {
-				printf("Выберите действие: \n"
-					"1. Поиск по диагонали \n"
-					"2. Поиск по матрице \n"
-					"3. Поиск по диагонали и матрице \n"
-					"4. Сортировка по производителю \n"
-					"5. Сортировка по разрешению \n"
-					"6. Сортировка по производетелю и разрешению \n"
-					"b. Главное меню \n");
+			printf("Выберите действие: \n"
+				"1. Поиск по диагонали \n"
+				"2. Поиск по матрице \n"
+				"3. Поиск по диагонали и матрице \n"
+				"4. Сортировка по производителю \n"
+				"5. Сортировка по разрешению \n"
+				"6. Сортировка по производетелю и разрешению \n"
+				"b. Главное меню \n");
 
-				scanf(" %c", &a);
-				while ((clear = getchar()) != '\n');
+			scanf(" %c", &a);
+			while ((clear = getchar()) != '\n');
 
-				switch (a)
-				{
-				case '1':
-					printf("Выберите единицу измерения (0 - дюймы, 1 - сантиметры): ");
-					unsigned short int check_category = isBinaryInput();
-					if(category_of_measurement == check_category)
-						printMonitorArray(monitors, size, category_of_measurement);
-					else {
-						changeMeasurement(monitors, size, &category_of_measurement);
-						printMonitorArray(monitors, size, category_of_measurement);
-					}
-
-					printf("Искомый элемент: ");
-					scanf("%f", &search_diagonal);
-					searcher = searchMonitorDiagonal(monitors, size, search_diagonal, &search_count);
-					printf("Найдено элементов: %d \n", search_count);
-					printMonitorArray(searcher, search_count, category_of_measurement);
-					break;
-				case '2':
-					printf("Искомый элемент: ");
-					scanf("%s", search_panel_type);
-					searcher = searchMonitorPanelType(monitors, size, search_panel_type, &search_count);
-					printf("Найдено элементов: %d \n", search_count);
-					printMonitorArray(searcher, search_count, category_of_measurement);
-					break;
-				case '3':
-					printf("Искомая диагональ: ");
-					scanf("%f", &search_diagonal);
-					printf("Искомая матрица: ");
-					scanf("%s", search_panel_type);
-					searcher = searchMonitorDiagonalAndPanelType(monitors, size, search_diagonal, search_panel_type, &search_count);
-					printf("Найдено элементов: %d \n", search_count);
-					printMonitorArray(searcher, search_count, category_of_measurement);
-					break;
-				case '4':
-					printf("Отсортированный массив: \n");
-					qsort(monitors, size, sizeof(Monitor), compareManufacturer);
-					editID(monitors, size);
+			switch (a)
+			{
+			case '1':
+				printf("Выберите единицу измерения (0 - дюймы, 1 - сантиметры): ");
+				unsigned short int check_category = isBinaryInput();
+				if(category_of_measurement == check_category)
 					printMonitorArray(monitors, size, category_of_measurement);
-					break;
-				case '5':
-					printf("Отсортированный массив: \n");
-					qsort(monitors, size, sizeof(Monitor), compareResolution);
-					editID(monitors, size);
-					printMonitorArray(monitors, size, category_of_measurement);
-					break;
-				case '6':
-					printf("Отсортированный массив: \n");
-					qsort(monitors, size, sizeof(Monitor), compareManufacturerAndResolution);
-					editID(monitors, size);
-					printMonitorArray(monitors, size, category_of_measurement);
-					break;
-				case 'b':
-					submenu_active = 0;
-					break;
-				default:
-					puts("Ошибка выбора! Повторите попытку");
-					break;
-				}
-			}
-		}
-		else if (submenu_active == 2) {
-			while (submenu_active) {
-				printf("Выберите действие: \n"
-					"1. Изменить единицу измерения \n"
-					"2. Добавить элементы \n"
-					"3. Изменить данные \n"
-					"b. Главное меню \n");
-
-				scanf(" %c", &a);
-				while ((clear = getchar()) != '\n');
-
-				switch (a)
-				{
-				case '1':
+				else {
 					changeMeasurement(monitors, size, &category_of_measurement);
 					printMonitorArray(monitors, size, category_of_measurement);
-					break;
-				case '2':
-					monitors = addData(monitors, &size);
-					printMonitorArray(monitors, size, category_of_measurement);
-					break;
-				case '3':
-					changeData(monitors, size);
-					printMonitorArray(monitors, size, category_of_measurement);
-					break;
-				case 'b':
-					submenu_active = 0;
-					break;
-				default:
-					puts("Ошибка выбора! Повторите попытку");
-					break;
 				}
-			}
-		}
-		else if (submenu_active == 3) {
-			while (submenu_active) {
-				printf("Выберите действие: \n"
-					"1. Выгрузить в файл \n"
-					"2. Загрузить из файла \n"
-					"3. Посмотреть содержимое файла \n"
-					"b. Главное меню \n");
 
-				scanf(" %c", &a);
-				while ((clear = getchar()) != '\n');
-
-				if (a == 'b') break;
-
-				printf("Имя файла: ");
-				scanf("%s", fname);
-				switch (a)
-				{
-				case '1':
-					output_file(fname, monitors, size, &category_of_measurement);
-					break;
-				case '2':
-					if (monitors != NULL)
-						free(monitors);
-					monitors = get_Input_File(fname, monitors, &size);
-					if (monitors != NULL)
-						printMonitorArray(monitors, size, category_of_measurement);
-					break;
-				case '3':
-					input_file(fname, monitors);
-					break;
-				default:
-					puts("Ошибка выбора! Повторите попытку");
-					break;
-				}
+				printf("Искомый элемент: ");
+				scanf("%f", &search_diagonal);
+				searcher = searchMonitorDiagonal(monitors, size, search_diagonal, &search_count);
+				printf("Найдено элементов: %d \n", search_count);
+				printMonitorArray(searcher, search_count, category_of_measurement);
+				break;
+			case '2':
+				printf("Искомый элемент: ");
+				scanf("%s", search_panel_type);
+				searcher = searchMonitorPanelType(monitors, size, search_panel_type, &search_count);
+				printf("Найдено элементов: %d \n", search_count);
+				printMonitorArray(searcher, search_count, category_of_measurement);
+				break;
+			case '3':
+				printf("Искомая диагональ: ");
+				scanf("%f", &search_diagonal);
+				printf("Искомая матрица: ");
+				scanf("%s", search_panel_type);
+				searcher = searchMonitorDiagonalAndPanelType(monitors, size, search_diagonal, search_panel_type, &search_count);
+				printf("Найдено элементов: %d \n", search_count);
+				printMonitorArray(searcher, search_count, category_of_measurement);
+				break;
+			case '4':
+				printf("Отсортированный массив: \n");
+				qsort(monitors, size, sizeof(Monitor), compareManufacturer);
+				editID(monitors, size);
+				printMonitorArray(monitors, size, category_of_measurement);
+				break;
+			case '5':
+				printf("Отсортированный массив: \n");
+				qsort(monitors, size, sizeof(Monitor), compareResolution);
+				editID(monitors, size);
+				printMonitorArray(monitors, size, category_of_measurement);
+				break;
+			case '6':
+				printf("Отсортированный массив: \n");
+				qsort(monitors, size, sizeof(Monitor), compareManufacturerAndResolution);
+				editID(monitors, size);
+				printMonitorArray(monitors, size, category_of_measurement);
+				break;
+			case 'b':
+				submenu_active = 0;
+				break;
+			default:
+				puts("Ошибка выбора! Повторите попытку");
+				break;
 			}
 		}
 
+		while (submenu_active == 2) {
+			printf("Выберите действие: \n"
+				"1. Изменить единицу измерения \n"
+				"2. Добавить элементы \n"
+				"3. Изменить данные \n"
+				"b. Главное меню \n");
+
+			scanf(" %c", &a);
+			while ((clear = getchar()) != '\n');
+
+			switch (a)
+			{
+			case '1':
+				changeMeasurement(monitors, size, &category_of_measurement);
+				printMonitorArray(monitors, size, category_of_measurement);
+				break;
+			case '2':
+				monitors = addData(monitors, &size);
+				printMonitorArray(monitors, size, category_of_measurement);
+				break;
+			case '3':
+				changeData(monitors, size);
+				printMonitorArray(monitors, size, category_of_measurement);
+				break;
+			case 'b':
+				submenu_active = 0;
+				break;
+			default:
+				puts("Ошибка выбора! Повторите попытку");
+				break;
+			}
+		}
+
+		while (submenu_active == 3) {
+			printf("Выберите действие: \n"
+				"1. Выгрузить в файл \n"
+				"2. Загрузить из файла \n"
+				"3. Посмотреть содержимое файла \n"
+				"b. Главное меню \n");
+
+			scanf(" %c", &a);
+			while ((clear = getchar()) != '\n');
+
+			if (a == 'b') break;
+
+			printf("Имя файла: ");
+			scanf("%s", fname);
+			switch (a)
+			{
+			case '1':
+				output_file(fname, monitors, size, &category_of_measurement);
+				break;
+			case '2':
+				if (monitors != NULL)
+					free(monitors);
+				monitors = get_Input_File(fname, monitors, &size);
+				if (monitors != NULL)
+					printMonitorArray(monitors, size, category_of_measurement);
+				break;
+			case '3':
+				input_file(fname, monitors);
+				break;
+			default:
+				puts("Ошибка выбора! Повторите попытку");
+				break;
+			}
+		}
 		
 	}
 
@@ -483,7 +476,6 @@ unsigned int getResolution() {
 float getDiagonal() {
 	float value;
 	while (1) {
-		;
 		if ((scanf("%f", &value) == 1) && value > -1) {
 			while (getchar() != '\n');
 			return value;
@@ -685,6 +677,7 @@ int input_file(char* filename, Monitor* monitors) {
 	}
 
 	fclose(file);
+	return 0;
 }
 
 int output_file(char* filename, Monitor* monitors, int size, int* category_of_measurement) {
