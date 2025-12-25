@@ -6,46 +6,49 @@
 #define INCH 2.54
 
 typedef struct monitor {
-	int id;
-	char manufacturer[31];
+	int id; // уникальный идентификатор
+	char manufacturer[31]; // название призводителя
 	float diagonal;
 	unsigned int horizontal_resolution;
 	unsigned int vertical_resolution;
-	char panel_type[20];
-	unsigned short int curved;
-	char hdmi_port[50];
+	char panel_type[20]; // матрица
+	unsigned short int curved; // изогнутость экрана
+	char hdmi_port[50]; // текстовая информация о hdmi-портах
 }Monitor;
 
-
+// прототипы функций для поиска
 Monitor* searchMonitorDiagonal(Monitor monitors[], int size, float search_element, int* result_count);
 Monitor* searchMonitorPanelType(Monitor monitors[], int size, char search_element[], int* result_count);
 Monitor* searchMonitorDiagonalAndPanelType(Monitor monitors[], int size, float search_diagonal, char search_panel_type[], int* result_count);
 
+// функция добавления новых даных
 Monitor* addData(Monitor monitors[], int* size);
 
+// вспомогательные функции для ввода данных
 int getManufacturer(Monitor* monitors, int index);
-
 unsigned short int isBinaryInput();
 unsigned int getResolution();
-
 float getDiagonal();
 
+// основыне функции для работы с массивом
 int fillMonitorArray(Monitor monitors[], int size);
 int printMonitorArray(Monitor monitors[], int size, int category_of_measurement);
 int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size);
 int changeMeasurement(Monitor monitors[], int size, int* category_of_measurement);
+
+// функции компараторы
 int compareManufacturer(const void* a, const void* b);
 int compareResolution(const void* a, const void* b);
 int compareManufacturerAndResolution(const void* a, const void* b);
+
+// редактирование данных
 int changeData(Monitor monitors[], int size);
 int editID(Monitor* monitors, int size);
 
+// работа с файлами
 int input_file(char* filename, Monitor* monitors);
 int output_file(char* filename, Monitor* monitors, int size, int* category_of_measurement);
-
 Monitor* get_Input_File(char* filename, Monitor* monitors, int* size);
-
-int testMonitorArray(Monitor monitors[], int size);
 
 int main(void) {
 	setlocale(LC_CTYPE, "RUS");
@@ -67,7 +70,6 @@ int main(void) {
 
 	while (menu_active) {
 		printf("Выберите действие: \n"
-			//"0. Заполнить массив тестовыми значениями \n"
 			"1. Ручной ввод данных \n"
 			"2. Загрузка данных из файла \n");
 
@@ -76,13 +78,6 @@ int main(void) {
 
 		switch (a)
 		{
-		case '0':
-			size = 5;
-			monitors = (Monitor*)malloc(size * sizeof(Monitor));
-			testMonitorArray(monitors, size);
-			printMonitorArray(monitors, size, category_of_measurement);
-			menu_active = 0;
-			break;
 		case '1':
 			printf("Введите количество записей: ");
 			scanf("%d", &size);
@@ -158,7 +153,7 @@ int main(void) {
 			case '1':
 				printf("Выберите единицу измерения (0 - дюймы, 1 - сантиметры): ");
 				unsigned short int check_category = isBinaryInput();
-				if(category_of_measurement == check_category)
+				if (category_of_measurement == check_category)
 					printMonitorArray(monitors, size, category_of_measurement);
 				else {
 					changeMeasurement(monitors, size, &category_of_measurement);
@@ -281,7 +276,7 @@ int main(void) {
 				break;
 			}
 		}
-		
+
 	}
 
 	system("pause");
@@ -291,7 +286,7 @@ int main(void) {
 Monitor* searchMonitorDiagonal(Monitor monitors[], int size, float search_element, int* result_count) {
 	int count = 0;
 	Monitor* search_result_array;
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < size; i++) // Подсчет количества совпадений
 	{
 		if (monitors[i].diagonal == search_element)
 			count++;
@@ -319,7 +314,7 @@ Monitor* searchMonitorDiagonal(Monitor monitors[], int size, float search_elemen
 Monitor* searchMonitorPanelType(Monitor monitors[], int size, char search_element[], int* result_count) {
 	int count = 0;
 	Monitor* search_result_array;
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < size; i++) // Подсчет количества совпадений
 	{
 		if (strcmp(monitors[i].panel_type, search_element) == 0)
 			count++;
@@ -347,7 +342,7 @@ Monitor* searchMonitorPanelType(Monitor monitors[], int size, char search_elemen
 Monitor* searchMonitorDiagonalAndPanelType(Monitor monitors[], int size, float search_diagonal, char search_panel_type[], int* result_count) {
 	int count = 0;
 	Monitor* search_result_array;
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < size; i++) // Подсчет количества совпадений
 	{
 		if (monitors[i].diagonal == search_diagonal && strcmp(monitors[i].panel_type, search_panel_type) == 0)
 			count++;
@@ -542,7 +537,7 @@ int printMonitorArray(Monitor monitors[], int size, int category_of_measurement)
 }
 
 int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size) {
-	fputs("  id  ||  Производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость ||         HDMI-порт         |\n", stream);
+	fputs("  id  ||  Производитель || Диагональ (дюймы) || Разрешение ||   Матрица   || Изогнутость ||          HDMI-порт        |\n", stream);
 	fputs("-----------------------------------------------------------------------------------------------------------------------\n", stream);
 	for (int i = 0; i < size; i++) {
 		fprintf(stream, " %3d  || %14s || %17.2f || %5ux%4u || %11s || %11hu || %25s |\n",
@@ -558,7 +553,7 @@ int printInFileMonitorArray(FILE* stream, Monitor monitors[], int size) {
 }
 
 int changeMeasurement(Monitor monitors[], int size, int* category_of_measurement) {
-	if (*category_of_measurement == 0)
+	if (*category_of_measurement == 0) // Переключение между дюймами и сантиметрами
 		*category_of_measurement = 1;
 	else
 		*category_of_measurement = 0;
@@ -576,8 +571,27 @@ int compareManufacturer(const void* a, const void* b) {
 	const Monitor* MonitorA = (const Monitor*)a;
 	const Monitor* MonitorB = (const Monitor*)b;
 
+	const char* s1 = MonitorA->manufacturer;
+	const char* s2 = MonitorB->manufacturer;
 
-	return _stricmp(MonitorA->manufacturer, MonitorB->manufacturer);
+	while (*s1 && *s2) {
+		char c1 = toupper((unsigned char)*s1);
+		char c2 = toupper((unsigned char)*s2);
+
+		if (c1 != c2) {
+			return c1 - c2;
+		}
+
+
+		if (*s1 != *s2) {
+			return *s1 - *s2;
+		}
+
+		s1++;
+		s2++;
+	}
+
+	return *s1 - *s2;
 }
 
 int compareResolution(const void* a, const void* b) {
@@ -585,7 +599,7 @@ int compareResolution(const void* a, const void* b) {
 	const Monitor* MonitorA = (const Monitor*)a;
 	const Monitor* MonitorB = (const Monitor*)b;
 
-	int resolutionA = MonitorA->horizontal_resolution * MonitorA->vertical_resolution;
+	int resolutionA = MonitorA->horizontal_resolution * MonitorA->vertical_resolution; // Вычисление общего разрешения
 	int resolutionB = MonitorB->horizontal_resolution * MonitorB->vertical_resolution;
 
 	if (resolutionA < resolutionB)
@@ -601,7 +615,7 @@ int compareManufacturerAndResolution(const void* a, const void* b) {
 	const Monitor* monitorA = (const Monitor*)a;
 	const Monitor* monitorB = (const Monitor*)b;
 
-	int manufacturer_cmp = _stricmp(monitorA->manufacturer, monitorB->manufacturer);
+	int manufacturer_cmp = _stricmp(monitorA->manufacturer, monitorB->manufacturer); // Сравнение без учета регистра
 	if (manufacturer_cmp != 0)
 		return manufacturer_cmp;
 
@@ -683,7 +697,7 @@ int input_file(char* filename, Monitor* monitors) {
 int output_file(char* filename, Monitor* monitors, int size, int* category_of_measurement) {
 	if (*category_of_measurement == 1) {
 		*category_of_measurement = 0;
-		changeMeasurement(monitors, size, &category_of_measurement);
+		changeMeasurement(monitors, size, &category_of_measurement); // Конвертация в дюймы перед записью в файл
 	}
 	FILE* file = fopen(filename, "w");
 	if (file == NULL) {
@@ -702,7 +716,7 @@ int output_file(char* filename, Monitor* monitors, int size, int* category_of_me
 
 Monitor* get_Input_File(char* filename, Monitor* monitors, int* size) {
 	char buffer[256];
-	int count = -1;
+	int count = 0;
 	Monitor* temp;
 	FILE* file = fopen(filename, "r");
 	if (file == NULL) {
@@ -710,111 +724,75 @@ Monitor* get_Input_File(char* filename, Monitor* monitors, int* size) {
 		return NULL;
 	}
 
-
+	int line_num = 0;
 	while (fgets(buffer, sizeof(buffer), file)) {
-		if (buffer[0] != ' '/* || buffer[0] == '\n' || buffer[0] == '\0'*/)
-			continue;
-		count++;
+		line_num++;
+		if (line_num > 2 && strlen(buffer) > 2) {
+			count++;
+		}
 	}
-
 
 	rewind(file);
-
-	for (int i = 0; i < 2; i++) {
-		if (fgets(buffer, sizeof(buffer), file) == NULL) {
-			puts("Недостаточно данных");
-			fclose(file);
-			return NULL;
-		}
-	}
-
-
 	temp = (Monitor*)malloc(count * sizeof(Monitor));
-	for (int i = 0; i < count; i++) {
-		if (fgets(buffer, sizeof(buffer), file) == NULL) continue;
 
-		int j = 0;
+	fgets(buffer, sizeof(buffer), file); // пропуск заголовков
+	fgets(buffer, sizeof(buffer), file);
 
-		if (buffer[0] != ' '/* || buffer[0] == '\n' || buffer[0] == '\0'*/)
-			continue;
+	int ind = 0;
 
-		for (int k = 0; k < sizeof(buffer); k++) {
-			if (buffer[k] != ' ' && buffer[k] != '\n') {
-				buffer[j] = buffer[k];
-				j++;
-			}
+	while (fgets(buffer, sizeof(buffer), file) && ind < count) {
+		char* tokens[8];
+		int i = 0;
 
+		char* token = strtok(buffer, "|");	// разбитик строки по |
+		while (token != NULL && i < 8) {
+			while (*token == ' ') token++;
+			char* end = token + strlen(token) - 1;
+			while (end > token && (*end == ' ' || *end == '\n')) end--;
+			*(end + 1) = '\0';
 
+			tokens[i] = token;
+			i++;
+			token = strtok(NULL, "|");
 		}
 
-		buffer[j - 1] = '\0';
+		if (i >= 7) {
+			// Производитель
+			if (strlen(tokens[1]) > 0)
+				strcpy(temp[ind].manufacturer, tokens[1]);
+			else
+				strcpy(temp[ind].manufacturer, "");
 
+			// Диагональ
+			temp[ind].diagonal = atof(tokens[2]);
 
+			// Разрешение
+			sscanf(tokens[3], "%ux%u",
+				&temp[ind].horizontal_resolution,
+				&temp[ind].vertical_resolution);
 
-		sscanf(buffer, "%*d||%29[^|]||%f||%ux%u||%19[^|]||%hu||%20[^|]",
-			temp[i].manufacturer,
-			&temp[i].diagonal,
-			&temp[i].horizontal_resolution, &temp[i].vertical_resolution,
-			temp[i].panel_type,
-			&temp[i].curved,
-			temp[i].hdmi_port);
-		temp[i].id = i;
+			// Матрица
+			if (strlen(tokens[4]) > 0)
+				strcpy(temp[ind].panel_type, tokens[4]);
+			else
+				strcpy(temp[ind].panel_type, "");
+
+			// Изогнутость
+			temp[ind].curved = atoi(tokens[5]);
+
+			// HDMI
+			if (strlen(tokens[6]) > 0)
+				strcpy(temp[ind].hdmi_port, tokens[6]);
+			else
+				strcpy(temp[ind].hdmi_port, "");
+
+			temp[ind].id = ind;
+			ind++;
+		}
 	}
 
-	printf("=== Количество элементов в массиве: %d ===\n", count);
-
-	*size = count;
+	printf("=== Считано записей: %d ===\n", ind);
+	*size = ind;
 	fclose(file);
-
 	return temp;
-
-}
-
-int testMonitorArray(Monitor monitors[], int size) {
-	monitors[0].id = 0;
-	strcpy(monitors[0].manufacturer, "Dell");
-	monitors[0].diagonal = 27.0f;
-	monitors[0].horizontal_resolution = 2560;
-	monitors[0].vertical_resolution = 1440;
-	strcpy(monitors[0].panel_type, "IPS");
-	monitors[0].curved = 0;
-	strcpy(monitors[0].hdmi_port, "1x_HDMI_2.0");
-
-	monitors[1].id = 1;
-	strcpy(monitors[1].manufacturer, "Samsung");
-	monitors[1].diagonal = 34.0f;
-	monitors[1].horizontal_resolution = 3440;
-	monitors[1].vertical_resolution = 1440;
-	strcpy(monitors[1].panel_type, "VA");
-	monitors[1].curved = 1;
-	strcpy(monitors[1].hdmi_port, "2x_HDMI_2.1");
-
-	monitors[2].id = 2;
-	strcpy(monitors[2].manufacturer, "LG");
-	monitors[2].diagonal = 24.0f;
-	monitors[2].horizontal_resolution = 1920;
-	monitors[2].vertical_resolution = 1080;
-	strcpy(monitors[2].panel_type, "IPS");
-	monitors[2].curved = 0;
-	strcpy(monitors[2].hdmi_port, "2x_HDMI_1.4");
-
-	monitors[3].id = 3;
-	strcpy(monitors[3].manufacturer, "ASUS");
-	monitors[3].diagonal = 32.0f;
-	monitors[3].horizontal_resolution = 3840;
-	monitors[3].vertical_resolution = 2160;
-	strcpy(monitors[3].panel_type, "OLED");
-	monitors[3].curved = 1;
-	strcpy(monitors[3].hdmi_port, "2x_HDMI_2.1");
-
-	monitors[4].id = 4;
-	strcpy(monitors[4].manufacturer, "Dell");
-	monitors[4].diagonal = 27.0f;
-	monitors[4].horizontal_resolution = 1920;
-	monitors[4].vertical_resolution = 1080;
-	strcpy(monitors[4].panel_type, "TN");
-	monitors[4].curved = 0;
-	strcpy(monitors[4].hdmi_port, "1x_VGA");
-
-	return 0;
 }
