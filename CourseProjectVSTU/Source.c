@@ -576,8 +576,27 @@ int compareManufacturer(const void* a, const void* b) {
 	const Monitor* MonitorA = (const Monitor*)a;
 	const Monitor* MonitorB = (const Monitor*)b;
 
+	const char* s1 = MonitorA->manufacturer;
+	const char* s2 = MonitorB->manufacturer;
 
-	return _stricmp(MonitorA->manufacturer, MonitorB->manufacturer);
+	while (*s1 && *s2) {
+		char c1 = toupper((unsigned char)*s1);
+		char c2 = toupper((unsigned char)*s2);
+
+		if (c1 != c2) {
+			return c1 - c2;
+		}
+
+
+		if (*s1 != *s2) {
+			return *s1 - *s2;
+		}
+
+		s1++;
+		s2++;
+	}
+
+	return *s1 - *s2;
 }
 
 int compareResolution(const void* a, const void* b) {
@@ -749,8 +768,6 @@ Monitor* get_Input_File(char* filename, Monitor* monitors, int* size) {
 
 		buffer[j - 1] = '\0';
 
-
-
 		sscanf(buffer, "%*d||%29[^|]||%f||%ux%u||%19[^|]||%hu||%20[^|]",
 			temp[i].manufacturer,
 			&temp[i].diagonal,
@@ -758,6 +775,7 @@ Monitor* get_Input_File(char* filename, Monitor* monitors, int* size) {
 			temp[i].panel_type,
 			&temp[i].curved,
 			temp[i].hdmi_port);
+
 		temp[i].id = i;
 	}
 
